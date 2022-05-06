@@ -3,37 +3,31 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { useMetaData } from "../Context/UserContext";
 import { api } from "../service/AxiosApiService";
+import Comment from "./Comment";
+import { NavLink } from "react-router-dom";
 
-function Posts({ userNum }) {
+function Posts({ userNum, postList, setPostList }) {
   let navigate = useNavigate();
-  var [postList, setPostList] = useState([]);
-  var metadata = useMetaData();
 
   const fetchPosts = (userNum) => {
-    var loadingToastId = toast.loading("fetching data");
+    const token = localStorage.getItem("userjwt");
 
-    var uri = "/api/post/fetch";
-
-    // if (userNum === null || userNum !== "undefined") {
-    //   uri = uri.concat(`/${userNum}`);
-    // }
-    var token = localStorage.getItem("userjwt");
     const headers = {
       Authorization: token,
     };
-    console.log(typeof token);
+    var loadingToastId = toast.loading("fetching data");
+    let uri = `/api/post/fetch/${userNum ?? ""}`;
+
     api
       .get(uri, {
         headers,
       })
       .then((res) => {
         toast.dismiss(loadingToastId);
-        console.log(`posts`);
         setPostList(res.data);
-        console.log(res.data);
       })
       .catch((err) => {
-        console.log(err);
+        toast.dismiss(loadingToastId);
         toast.error("Error fetching post details");
       });
   };
@@ -42,19 +36,19 @@ function Posts({ userNum }) {
     if (localStorage.getItem("userjwt") == null) {
       navigate("/login");
     }
-    fetchPosts();
+    fetchPosts(userNum);
   }, []);
 
   return (
     <>
-      <div className="container-fluid mt-4">
-        <div className="card shadow">
-          <CreatePost />
-          {postList.length &&
-            postList.map((post) => <Post key={post.postNum} post={post} />)}
-        </div>
-        <ToastContainer />
+      <div className="card shadow">
+        {postList.length === 0 ? (
+          <span className="text-center">"No posts to show !"</span>
+        ) : (
+          postList.map((post) => <Post key={post.postNum} post={post} />)
+        )}
       </div>
+      <ToastContainer />
     </>
   );
 }
@@ -73,135 +67,22 @@ const Post = ({ post }) => {
 const PostDetail = ({ post }) => {
   return (
     <div className="card-body collapse" id={`postCollapse_${post.postNum}`}>
-      <p className="lead card-text">{post.text}</p>
-      <div className="row mt-5">
-        <div className="col col-md-1">
-          <button className="btn btn-primary mt-2" type="button">
-            <i className="fa fa-heart"></i>
-          </button>
-        </div>
-        <div className="col col-md-11 col-12 text-end">
-          <textarea
-            className="form-control"
-            rows="2"
-            placeholder="Add a comment ..."
-          ></textarea>
-          <span role="button">Comment</span>
-        </div>
-      </div>
+      <p className="lead card-text" style={{ whiteSpace: "pre-wrap" }}>
+        {post.text}
+      </p>
+
       <Comment post={post} />
     </div>
   );
 };
 
-const Comment = ({ post }) => {
-  return (
-    <>
-      <div className="row">
-        <div className="col">
-          <div id={`commentCollaps_${post.postNum}`} className="collapse hide">
-            <CommentDetails />
-          </div>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col" style={{ textAlign: "left" }}>
-          <span
-            role="button"
-            href={`#commentCollaps_${post.postNum}`}
-            data-bs-toggle="collapse"
-          >
-            Toggle Hide/show comments
-          </span>
-        </div>
-        <div className="col" style={{ textAlign: "right" }}>
-          <span
-            role="button"
-            href={`#commentCollaps_${post.postNum}`}
-            data-bs-toggle="collapse"
-          >
-            Load comments
-          </span>
-        </div>
-      </div>
-    </>
-  );
-};
-const CommentDetails = () => {
-  return (
-    <div className="card mt-1 border-0">
-      <div
-        className="card-body"
-        style={{
-          borderTopStyle: "none",
-          borderRightStyle: "none",
-          borderBottomStyle: "none",
-          borderLeftStyle: "solid",
-        }}
-      >
-        <p className="card-text">
-          Crazy.
-          <span className="text-info">&nbsp;- shreeram 10:01</span>
-        </p>
-        <ul className="list-group mt-1">
-          <li
-            className="list-group-item"
-            style={{
-              borderTopStyle: "none",
-              borderRightStyle: "none",
-              borderBottomStyle: "none",
-              borderLeftStyle: "solid",
-              borderTopLeftRadius: "0px",
-              borderTopRightRadius: "0px",
-            }}
-          >
-            <span>thats good</span>
-            <span className="text-info mx-2">- shreeram 10:01</span>
-          </li>
-          <li
-            className="list-group-item"
-            style={{
-              borderTopStyle: "none",
-              borderRightStyle: "none",
-              borderBottomStyle: "none",
-              borderLeftStyle: "solid",
-              borderTopLeftRadius: "0px",
-              borderTopRightRadius: "0px",
-              borderBottomRightRadius: "0px",
-              borderBottomLeftRadius: "0px",
-            }}
-          >
-            <span>cool</span>
-            <span className="text-info mx-2">- shreeram 10:01</span>
-          </li>
-        </ul>
-        <div className="input-group">
-          <input
-            className="form-control mb-2"
-            type="text"
-            style={{
-              height: "35px",
-              borderRadius: "0px",
-              borderTopStyle: "none",
-              borderRightStyle: "none",
-              borderBottomStyle: "1px",
-              borderLeftStyle: "none",
-            }}
-            placeholder="reply"
-          ></input>
-          <button
-            className="btn btn-primary"
-            type="button"
-            style={{ height: "35px" }}
-          >
-            <i className="fa fa-reply"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 const PostHeader = ({ post }) => {
+  const classNames = {
+    1001: "badge bg-primary",
+    1002: "badge bg-warning text-dark",
+    1003: "badge bg-info text-dark",
+  };
+
   return (
     <div
       className="btn card-header text-start"
@@ -209,11 +90,26 @@ const PostHeader = ({ post }) => {
       href={`#postCollapse_${post.postNum}`}
     >
       <div className="row">
-        <div className="col">
-          {/* Author info */}
-          <h6 className="text-info">
-            {post.user.name} - {post.rowUpdateStamp}
-          </h6>
+        <div className="row justify-content-between">
+          <div className="col-auto me-auto">
+            {/* Author info */}
+            <NavLink
+              className="nav-link p-0"
+              to={`/posts/${post.user.userNum}`}
+            >
+              <h6 className="text-info">
+                {post.user.firstName.concat(` ${post.user.lastName}` ?? ``)}{" "}
+                {" - "}
+                {post.rowUpdateStamp}
+              </h6>
+            </NavLink>
+          </div>
+
+          <div className="col-auto">
+            <span className={`${classNames[post.postType.typeRefNum]}`}>
+              {post.postType.description}
+            </span>
+          </div>
         </div>
       </div>
       <div className="row mb-0">
@@ -225,8 +121,42 @@ const PostHeader = ({ post }) => {
     </div>
   );
 };
-export const CreatePost = () => {
-  var [myPost, setMyPost] = useState({});
+export const CreatePost = ({ postList, setPostList }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  var { metadata, allowedPostType } = useMetaData();
+
+  var [myPost, setMyPost] = useState({
+    text:
+      user.signature === null || user.signature.length === 0
+        ? ""
+        : "\n".concat(user.signature),
+    upvote: 0,
+    topicNum: 1,
+    user,
+    postType: {},
+    title: "",
+  });
+
+  const savePost = () => {
+    const token = localStorage.getItem("userjwt");
+
+    const headers = {
+      Authorization: token,
+    };
+    let uri = "/api/post/save";
+    api
+      .post(uri, myPost, {
+        headers,
+      })
+      .then((res) => {
+        toast.success("Post added !");
+        setPostList([res.data, ...postList]);
+      })
+      .catch((err) => {
+        toast.error("Error occured while saving the post !");
+      });
+  };
+
   return (
     <>
       <div className="card-header py-3" id="createPost">
@@ -235,7 +165,7 @@ export const CreatePost = () => {
             <div className="col col-1">
               <img
                 className="rounded-circle img-fluid d-block"
-                src="assets/img/avatars/avatar1.jpeg"
+                src="assets/img/avatars/dm-profile.jpg"
               ></img>
             </div>
             <div className="col container">
@@ -271,8 +201,7 @@ export const CreatePost = () => {
                 placeholder="Add title"
                 value={myPost.title}
                 onChange={(e) => {
-                  myPost.title = e.target.value;
-                  setMyPost(myPost);
+                  setMyPost({ ...myPost, title: e.target.value });
                 }}
               ></input>
               <button
@@ -288,8 +217,7 @@ export const CreatePost = () => {
                 placeholder="Add main content"
                 value={myPost.text}
                 onChange={(e) => {
-                  myPost.text = e.target.value;
-                  setMyPost(myPost);
+                  setMyPost({ ...myPost, text: e.target.value });
                 }}
               ></textarea>
             </div>
@@ -306,16 +234,29 @@ export const CreatePost = () => {
                     borderColor: "var(--bs-gray-100)",
                   }}
                 >
-                  {myPost.postType ?? `Post Type`}
+                  {myPost.postType.description ?? `Post Type`}
                 </button>
                 <div className="dropdown-menu">
-                  <span className="dropdown-item">First Item</span>
-                  <a className="dropdown-item" href="#">
-                    Second Item
-                  </a>
-                  <a className="dropdown-item" href="#">
-                    Third Item
-                  </a>
+                  {Object.entries(allowedPostType).map((pt) => (
+                    <option
+                      style={{ cursor: "pointer" }}
+                      className="dropdown-item pointer"
+                      key={pt[0]}
+                      value={pt[0]}
+                      id={pt[0]}
+                      onClick={(e) => {
+                        setMyPost({
+                          ...myPost,
+                          postType: {
+                            typeRefNum: e.target.value,
+                            description: allowedPostType[e.target.value],
+                          },
+                        });
+                      }}
+                    >
+                      {pt[1]}
+                    </option>
+                  ))}
                 </div>
               </div>
               <button
@@ -325,7 +266,12 @@ export const CreatePost = () => {
               >
                 Close
               </button>
-              <button className="btn btn-primary" type="button">
+              <button
+                className="btn btn-primary"
+                type="button"
+                data-bs-dismiss="modal"
+                onClick={savePost}
+              >
                 <i className="fa fa-send"></i>
               </button>
             </div>

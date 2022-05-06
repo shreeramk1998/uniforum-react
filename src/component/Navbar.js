@@ -1,8 +1,10 @@
 import React from "react";
-import { Navigate, NavLink, Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
 
 export default function Navbar() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  let currentPath = useLocation();
+
   return (
     <>
       <div className="container-fluid bg-light">
@@ -29,7 +31,7 @@ export default function Navbar() {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/myposts">
+                <NavLink className="nav-link" to={`/posts/${user.userNum}`}>
                   My Posts
                 </NavLink>
               </li>
@@ -49,11 +51,11 @@ export default function Navbar() {
                       Profile
                     </NavLink>
                   </li>
-                  <li>
+                  {/* <li>
                     <NavLink className="dropdown-item" to="/activity/">
                       My Activity
                     </NavLink>
-                  </li>
+                  </li> */}
                   <li>
                     <hr className="dropdown-divider" />
                   </li>
@@ -65,17 +67,23 @@ export default function Navbar() {
                 </ul>
               </li>
             </ul>
-            <form className="d-flex">
-              <input
-                className="form-control me-2"
-                type="search"
-                placeholder="Search"
-                aria-label="Search"
-              ></input>
-              <button className="btn btn-outline" type="submit">
-                Search
-              </button>
-            </form>
+            {/* {currentPath.pathname === "/home" ? (
+              <form className="d-flex">
+                <input
+                  className="form-control me-2"
+                  type="search"
+                  placeholder="Search"
+                  aria-label="Search"
+                ></input>
+                <button className="btn btn-outline" type="submit">
+                  Search
+                </button>
+              </form>
+            ) : (
+              <></>
+            )} */}
+
+            <span className="text-end">{user.firstName}</span>
           </div>
         </nav>
       </div>

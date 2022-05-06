@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import App from "../App";
 import Home from "./Home";
 import Login from "./Login";
-import MyPosts from "./MyPosts";
+import UserPost from "./UserPost";
 import Navbar from "./Navbar";
 import Posts from "./Posts";
 import Profile from "./Profile";
@@ -24,8 +24,8 @@ function MainRoute() {
             </MetaDataContextProvider>
           }
         >
-          <Route path="home" element={<Posts />} />
-          <Route path="myposts" element={<MyPosts />} />
+          <Route path="home" element={<Home />} />
+          <Route path="/posts/:userNum" element={<UserPost />} />
           <Route path="profile" element={<Profile />} />
         </Route>
         <Route path="/login" element={<Login />}></Route>

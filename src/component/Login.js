@@ -8,8 +8,10 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
   useEffect(() => {
     localStorage.removeItem("userjwt");
+    localStorage.removeItem("user");
   });
 
   const performLogin = (e) => {
@@ -17,7 +19,9 @@ function Login() {
 
     LoginService.authenticate(username, password)
       .then((res) => {
+        console.log(res.data);
         localStorage.setItem("userjwt", res.headers.authorization);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
         navigate("/home");
       })
       .catch((err) => {
@@ -47,7 +51,8 @@ function Login() {
                 <div className="col-lg-6">
                   <div className="p-5">
                     <div className="text-center">
-                      <h4 className="text-dark mb-4">Welcome Back!</h4>
+                      <h4 className="text-dark mb-2">UNIFORUM</h4>
+                      <h5 className="mb-4">Login</h5>
                     </div>
                     <form className="user" onSubmit={(e) => performLogin(e)}>
                       <div className="mb-3">
@@ -73,7 +78,7 @@ function Login() {
                           onChange={(e) => setPassword(e.target.value)}
                         ></input>
                       </div>
-                      <div className="mb-3">
+                      {/* <div className="mb-3">
                         <div className="custom-control custom-checkbox small">
                           <div className="form-check">
                             <input
@@ -89,7 +94,7 @@ function Login() {
                             </label>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                       <button
                         className="btn btn-primary d-block btn-user w-100"
                         type="submit"
